@@ -8,6 +8,8 @@ from flask_application.WebAppProjects.LACO_SW_TraceApp import TraceSQLQueries
 import io
 import csv
 
+from werkzeug.utils import escape  # Import escape function
+
 # lacoSWTraceapp_API_BP = Blueprint('lacoSWTraceapp_API_BP', __name__,
 #                         template_folder='templates',
 #                         static_folder='static', subdomain="api")
@@ -72,7 +74,7 @@ def handletracerequest():
         # Check if any lnglats were returned, if not skip getting subwatersheds
         if len(lnglats) > 0:
             # Get subwatersheds as geojson
-            subWaterSheds = TraceSQLQueries.getSubWaterSheds(lnglats)
+            subWaterSheds = TraceSQLQueries.getSubWaterSheds(escape(lnglats))
             # Get unioned/dissolved subwatershed boundary
             # unionGeom = TraceSQLQueries.getUnionedSubWaterSheds(lnglats)
             req = QueryEsriRest.featureServReq(parcelsURL, subWaterSheds, ['APN', 'SitusFullAddress', 'UseType', 'UseDescription'],
