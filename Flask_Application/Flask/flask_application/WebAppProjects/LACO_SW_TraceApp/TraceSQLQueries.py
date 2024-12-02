@@ -50,17 +50,28 @@ def getSubWaterSheds(lnglatList):
     resList = []
     # Query DB
     # results = db.session.execute(sql)
+
+    # Execute the query with parameterized coordinates
     with lacotraceSes() as session:
-        results = session.execute(sql)
+        results = session.execute(sql, {f'lng': lng, f'lat': lat for lng, lat in lnglatList})
+    
     for i in results:
-        # Load postgres subwatershed geom query result into geojson format
-        # resDict[i.id] = {}
-        # resDict[i.id]['geom'] = geojson.loads(i.geom)
-        # resDict[i.id]['watershed'] = i.watershed
-        propDict = {"factype":"subwatersheds"}
-        # flask_application.logger.debug(i.id)
+        propDict = {"factype": "subwatersheds"}
         resList.append(Feature(geometry=Polygon(geojson.loads(i.geom)), properties=propDict))
+    
+#    with lacotraceSes() as session:
+#        results = session.execute(sql)
+#    for i in results:
+#        # Load postgres subwatershed geom query result into geojson format
+#        # resDict[i.id] = {}
+#        # resDict[i.id]['geom'] = geojson.loads(i.geom)
+#        # resDict[i.id]['watershed'] = i.watershed
+#        propDict = {"factype":"subwatersheds"}
+#        # flask_application.logger.debug(i.id)
+#        resList.append(Feature(geometry=Polygon(geojson.loads(i.geom)), properties=propDict))
     return resList
+
+
 
 def getUnionedSubWaterSheds(lnglatList):
     latlngStr = ""
