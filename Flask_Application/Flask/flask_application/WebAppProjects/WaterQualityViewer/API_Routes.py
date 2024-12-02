@@ -9,5 +9,5 @@ sbcWaterQualityAPI_BP = Blueprint('sbcWaterQualityAPI_BP', __name__,
 
 @sbcWaterQualityAPI_BP.route("getbeachhistory", methods=['GET'])
 def getWaterQualityHistory():
-    beachName = str(request.args.get("beachName"))
-    return DBQueriesWaterQuality.getBeachResults(escape(beachName))
+    beachName = escape(str(request.args.get("beachName")))
+    return DBQueriesWaterQuality.getBeachResults(beachName)
