@@ -11,22 +11,42 @@ def getSubWaterSheds(lnglatList):
     length = len(lnglatList)
     # watershedLayer = "la_co_subwatersheds"
     watershedLayer = "subwatershedstrace"
-    for c, i in enumerate(lnglatList):
-        newPT = f"ST_Transform(ST_SetSRID(ST_Point({i[0]}, {i[1]}), 4326), 2229)"
-        latlngStr += newPT
-        if (c + 1) != length:
-            latlngStr += ","
-    sql =f"""
-WITH pttcollect AS (SELECT ST_Collect(
-		ARRAY[{latlngStr}]) AS geom)
-SELECT
-    ST_AsGeoJSON(st_transform(sw.geom, 4326)) AS geom, sw.val AS id
-FROM
-    {watershedLayer} AS sw, pttcollect AS pts
-WHERE
-    ST_Intersects(sw.geom, pts.geom)
+
+
+    #for c, i in enumerate(lnglatList):
+    #    newPT = f"ST_Transform(ST_SetSRID(ST_Point({i[0]}, {i[1]}), 4326), 2229)"
+    #    latlngStr += newPT
+    #    if (c + 1) != length:
+    #        latlngStr += ","
+
+    # Parameterize coordinate values for the SQL query
+    for lng, lat in lnglatList:
+        latlngStr.append(f"ST_Transform(ST_SetSRID(ST_Point(:lng, :lat), 4326), 2229)")
+
+    
+#    sql =f"""
+#WITH pttcollect AS (SELECT ST_Collect(
+#		ARRAY[{latlngStr}]) AS geom)
+#SELECT
+#    ST_AsGeoJSON(st_transform(sw.geom, 4326)) AS geom, sw.val AS id
+#FROM
+#    {watershedLayer} AS sw, pttcollect AS pts
+#WHERE
+#    ST_Intersects(sw.geom, pts.geom)
+#    """
+
+# Query construction with placeholders for coordinates
+    sql = f"""
+    WITH pttcollect AS (SELECT ST_Collect(ARRAY[{', '.join(latlngStr)}]) AS geom)
+    SELECT
+        ST_AsGeoJSON(st_transform(sw.geom, 4326)) AS geom, sw.val AS id
+    FROM
+        {watershedLayer} AS sw, pttcollect AS pts
+    WHERE
+        ST_Intersects(sw.geom, pts.geom)
     """
-    # resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
+
+# resultDict['Outlets'].append(Feature(geometry=Point(geojsonGeom), properties=propDict))
     resList = []
     # Query DB
     # results = db.session.execute(sql)
