@@ -3,6 +3,8 @@ from flask import Blueprint, Response, request
 from flask_application.WebAppProjects.StravaActivityViewer import WebHookFunctionsStrava
 from flask_application.util.Boto3AWS import StravaAWSS3
 
+from werkzeug.utils import escape  # Import escape function
+
 stravaActDashAPI_BP = Blueprint('stravaActDashAPI_BP', __name__,
                         template_folder='templates',
                         static_folder='static')
@@ -46,7 +48,7 @@ def getsteamS3url():
     """
     actID = str(request.args.get("actID"))
     # print(f"csvname is: {actID}")
-    res = StravaAWSS3.create_presigned_url(actID)
+    res = StravaAWSS3.create_presigned_url(escape(actID))
     return res
 
 @stravaActDashAPI_BP.route("/getstravatopojsonurl", methods=['GET'])
